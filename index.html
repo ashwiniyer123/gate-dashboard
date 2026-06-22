@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GATE CSE Test Tracker</title>
+    <!-- Fonts: Inter & Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Top Navigation -->
+        <header class="top-nav glass-panel">
+            <div class="logo">
+                <i class="ph ph-exam"></i>
+                <span>GATE Tracker</span>
+            </div>
+            <div class="nav-actions">
+                <div class="search-box">
+                    <i class="ph ph-magnifying-glass"></i>
+                    <input type="text" id="searchInput" placeholder="Search subjects...">
+                </div>
+                <button id="expandAllBtn" class="icon-btn" title="Expand/Collapse All"><i class="ph ph-arrows-out-line-vertical"></i></button>
+                <button id="themeToggleBtn" class="icon-btn" title="Toggle Theme"><i class="ph ph-sun"></i></button>
+                <div class="dropdown">
+                    <button class="icon-btn" title="Settings"><i class="ph ph-gear"></i></button>
+                    <div class="dropdown-content">
+                        <button id="exportBtn"><i class="ph ph-download-simple"></i> Export Data</button>
+                        <button id="importBtn" onclick="document.getElementById('importFile').click()"><i class="ph ph-upload-simple"></i> Import Data</button>
+                        <input type="file" id="importFile" accept=".json" style="display:none">
+                        <button id="resetBtn" class="danger"><i class="ph ph-trash"></i> Reset All</button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Top Dashboard Section -->
+        <section class="hero" style="margin-bottom: 2rem;">
+            <div class="quote-container">
+                <h2 id="motivationalQuote">“Small progress every day compounds into success.”</h2>
+            </div>
+            
+            <div class="top-dashboard-grid">
+                <!-- Left Side: Overall Progress -->
+                <div class="left-panel">
+                    <div class="charts-row" style="margin-bottom: 1.5rem;">
+                        <div class="chart-card glass-panel">
+                            <h3>Overall Progress</h3>
+                            <div class="chart-container-doughnut">
+                                <canvas id="overallDoughnutChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-card glass-panel" style="flex: 2;">
+                            <h3>Subject Wise Progress</h3>
+                            <div class="subject-bars-container" id="subjectBarsContainer">
+                                <!-- Subject progress bars injected here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Side: Countdown -->
+                <div class="right-panel" style="align-self: start;">
+                    <div class="countdown-card glass-panel" style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; padding: 2rem;">
+                        <div class="countdown-content" style="display: flex; flex-direction: column; align-items: center; text-align: center;">
+                            <h3 class="countdown-title">GATE 2027 Countdown</h3>
+                            <div class="main-countdown">
+                                <div class="progress-ring-container" style="width: 180px; height: 180px; margin: 0 auto;">
+                                    <svg class="progress-ring" width="180" height="180">
+                                        <circle class="progress-ring-bg" stroke-width="8" fill="transparent" r="80" cx="90" cy="90"/>
+                                        <circle class="progress-ring-value" stroke-width="8" fill="transparent" r="80" cx="90" cy="90"/>
+                                    </svg>
+                                    <div class="countdown-text">
+                                        <span id="daysLeft" class="days-number" style="font-size: 3rem;">0</span>
+                                        <span class="days-label" style="font-size: 0.8rem;">DAYS LEFT</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <p id="timeRemaining" class="time-subtext">0 months 0 days remaining</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stats-grid" style="margin-top: 2rem; width: 100%;">
+                <div class="stat-card glass-panel">
+                    <div class="stat-icon"><i class="ph ph-check-circle"></i></div>
+                    <div class="stat-details">
+                        <span class="stat-value" id="statCompleted">0</span>
+                        <span class="stat-label">Tests Completed</span>
+                    </div>
+                </div>
+                <div class="stat-card glass-panel">
+                    <div class="stat-icon"><i class="ph ph-hourglass-high"></i></div>
+                    <div class="stat-details">
+                        <span class="stat-value" id="statRemaining">0</span>
+                        <span class="stat-label">Remaining Tests</span>
+                    </div>
+                </div>
+                <div class="stat-card glass-panel">
+                    <div class="stat-icon"><i class="ph ph-chart-pie-slice"></i></div>
+                    <div class="stat-details">
+                        <span class="stat-value" id="statPercentage">0%</span>
+                        <span class="stat-label">Completion %</span>
+                    </div>
+                </div>
+                <div class="stat-card glass-panel">
+                    <div class="stat-icon"><i class="ph ph-trend-up"></i></div>
+                    <div class="stat-details">
+                        <span class="stat-value" id="statReadiness">0</span>
+                        <span class="stat-label">Est. Readiness Score</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Analytics Section -->
+        <section class="analytics">
+            <h2 class="section-title">Analytics & Activity</h2>
+            <div class="charts-row">
+                <div class="chart-card glass-panel">
+                    <h3>Test Distribution</h3>
+                    <div class="chart-container-pie">
+                        <canvas id="testDistributionPieChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card glass-panel" style="flex: 0 0 auto; width: 290px;">
+                    <h3>Activity Calendar</h3>
+                    <div class="heatmap-container" id="heatmapContainer">
+                        <!-- Heatmap injected here -->
+                    </div>
+                    <div class="streak-counter">
+                        <i class="ph ph-fire"></i>
+                        <span>Current Streak: <strong id="currentStreak">0 Weeks</strong></span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Subject Tests Section -->
+        <section class="subject-tests">
+            <h2 class="section-title">Subject Tests</h2>
+            <div class="subjects-grid" id="subjectsGrid">
+                <!-- Subject Cards injected here -->
+            </div>
+        </section>
+
+        <!-- Big Tests Section -->
+        <section class="big-tests">
+            <h2 class="section-title">Big Tests / Multi-Subject</h2>
+            <div class="timeline-container" id="bigTestsTimeline">
+                <!-- Timeline cards injected here -->
+            </div>
+        </section>
+
+        <!-- Full Length Mocks Section -->
+        <section class="full-length">
+            <h2 class="section-title">Full Length Mocks Journey</h2>
+            <div class="journey-card glass-panel">
+                <div class="journey-stats">
+                    <span id="flMocksCount">0 / 17 Completed</span>
+                    <span id="flMocksPercentage">0%</span>
+                </div>
+                <div class="journey-tracker-scroll">
+                    <div class="journey-tracker" id="journeyTracker">
+                        <!-- Journey steps injected here -->
+                    </div>
+                </div>
+            </div>
+            <div class="chart-card glass-panel mt-4">
+                <h3>Mock Score Progression</h3>
+                <div class="chart-container-line">
+                    <canvas id="mockScoreChart"></canvas>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Modals -->
+    <div id="scoreModal" class="modal">
+        <div class="modal-content glass-panel">
+            <span class="close-btn">&times;</span>
+            <h3 id="modalMockTitle">Enter Score</h3>
+            <div class="input-group">
+                <label for="mockScoreInput">Score (out of 100):</label>
+                <input type="number" id="mockScoreInput" min="0" max="100" step="0.1">
+            </div>
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <button id="saveScoreBtn" class="primary-btn">Save Score</button>
+                <button id="clearScoreBtn" class="primary-btn" style="background: var(--card-border); color: var(--text-primary);">Clear Score</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Questions Modal -->
+    <div id="questionsModal" class="modal">
+        <div class="modal-content glass-panel">
+            <span class="close-btn" id="closeQuestionsModal">&times;</span>
+            <h3 id="modalQuestionsTitle">Enter Details</h3>
+            <div class="input-group">
+                <label for="correctQsInput">Correct Questions:</label>
+                <input type="number" id="correctQsInput" min="0" step="1">
+            </div>
+            <div class="input-group">
+                <label for="totalQsInput">Total Questions:</label>
+                <input type="number" id="totalQsInput" min="1" step="1">
+            </div>
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <button id="saveQuestionsBtn" class="primary-btn">Save Details</button>
+                <button id="clearQuestionsBtn" class="primary-btn" style="background: var(--card-border); color: var(--text-primary);">Clear Details</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
